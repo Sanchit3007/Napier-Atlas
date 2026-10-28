@@ -139,6 +139,12 @@ Returns `201` with the saved estimate's `id`, `url`, recommended strain, figures
 | `soilType` | Black Cotton, Loamy, Red Soil, Alluvial, Sandy Loam, Marginal Lands |
 | `irrigationLevel` | `Assured Drip / Borewell`, `Moderate Canal / Rainfed + Supplemental`, `Rainfed Only` |
 | `primaryGoal` | `BIO_CNG_BIOMASS`, `DUAL_PURPOSE`, `DAIRY_FODDER` |
+| `animals` *(optional)* | `cows`, `goats` |
+| `feeding` *(optional)* | `cut`, `graze` |
+| `sunlight` *(optional)* | `open`, `shaded` |
+| `priority` *(optional)* | `tonnage`, `balanced`, `quality` |
+
+The response also includes `ranking`: every strain with its match `score`, `reasons` and `cautions`.
 
 ---
 
@@ -147,7 +153,12 @@ Returns `201` with the saved estimate's `id`, `url`, recommended strain, figures
 All maths lives in [`src/lib/simulator.ts`](src/lib/simulator.ts).
 
 1. **Yield per acre** = the strain's fresh yield × the water-supply factor × the soil factor.
-2. **Recommended strain:** each strain is scored on protein output (for fodder) and methane output (for Bio-CNG), weighted by the chosen goal.
+2. **Recommended strain:** every strain gets a **match score** (0–100%) from three parts, weighted by "What matters most":
+   - **Output:** methane or protein per acre compared with the best strain, on a square-root scale so 3× the tonnage helps but cannot outweigh everything else.
+   - **Feed quality:** crude protein compared with the best strain.
+   - **Fit:** how well the strain suits the animals fed, how they eat it and the plot's sunlight, based on each strain's published strengths.
+
+   A soil the strain isn't listed for scores ×0.75; on a shaded plot, strains without a published shade trial score ×0.8. The results show the best match with its reasons, and the other strains ranked below.
 3. **Methane** = fresh tons × the Bio-CNG share × dry matter % × 86.2% organic share × the strain's methane per ton of organic matter.
 4. **Bio-CNG per day** = methane × 0.72 kg/m³ ÷ 365. **Fossil CO₂ avoided** = Bio-CNG mass × 2.75.
 5. **5-year projection:** year 1 loses the establishment period before the first cut; later years use the full yield.
@@ -157,6 +168,8 @@ All maths lives in [`src/lib/simulator.ts`](src/lib/simulator.ts).
 | Organic share of dry matter | 86.2% | Feedipedia: ash averages 13.8% of Napier dry matter |
 | Moderate water / rainfed | 82% / 60% of full yield | Model assumption |
 | Soil the strain isn't suited to | 80% of full yield | Model assumption |
+| Match-score weights (output / quality / fit) | Most tonnage 50/5/45 · Balanced 30/20/50 · Best quality 10/40/50 | Model assumption |
+| Fit values per strain | 0–1 for each answer | Model judgement from each strain's sources |
 | Green fodder per cow | ~40 kg a day | Model assumption |
 | Stem cuttings | 11,000 per acre (about 2 × 2 ft spacing) | Arithmetic from spacing |
 
@@ -179,7 +192,7 @@ Notes on the data:
 
 - Yields are **fresh fodder per acre per year** (1 hectare = 2.47 acres).
 - Methane figures are **lab results per ton of organic matter**. Published values for pure Napier grass are about 120–250 m³.
-- Super Napier's 200 t/acre is the **breeder's best-case figure**, so the estimator recommends it in most cases.
+- Super Napier uses a **typical 150 t/acre** (the breeder's 360–400 t/ha for ordinary Napier); his 500 t/ha is a best case.
 - Plant heights, suitable soils and some dry-matter values are typical figures, not strain-specific measurements.
 - The five-year harvest calendar is an example period. No source given here fixes a stand's lifespan.
 

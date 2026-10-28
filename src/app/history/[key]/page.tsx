@@ -39,7 +39,9 @@ async function HistoryDetail({ params }: Readonly<Pick<PageProps<'/history/[key]
   const rows = saves.map((sim) => {
     const strain = strains.find((s) => s.name === sim.recommendedStrain);
     const result = strain ? simulate([strain], sim) : null;
-    return { sim, result };
+    // Estimates saved with the situation questions export the full top-3 ranking.
+    const ranking = sim.priority ? simulate(strains, sim).ranking : result?.ranking;
+    return { sim, result, ranking };
   });
 
   return (
@@ -85,7 +87,7 @@ async function HistoryDetail({ params }: Readonly<Pick<PageProps<'/history/[key]
         </div>
       ) : (
         <ul className="space-y-3">
-          {rows.map(({ sim, result }) => (
+          {rows.map(({ sim, result, ranking }) => (
             <li
               key={sim.id}
               className="rounded-3xl bg-slate-900 border border-slate-800 p-5 flex flex-col lg:flex-row lg:items-center gap-4"
@@ -118,7 +120,7 @@ async function HistoryDetail({ params }: Readonly<Pick<PageProps<'/history/[key]
                 {result && (
                   <EstimateDownloads
                     compact
-                    estimate={toEstimateExport(sim, result, { savedAt: sim.createdAt, path: `/simulation/${sim.id}` })}
+                    estimate={toEstimateExport(sim, result, { savedAt: sim.createdAt, path: `/simulation/${sim.id}` }, ranking)}
                   />
                 )}
                 <form action={removeEstimate.bind(null, key, sim.id)}>

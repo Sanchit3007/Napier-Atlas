@@ -16,6 +16,10 @@ export function toSimInput(raw: Record<string, unknown>): SimInput {
     soilType: text(raw.soilType),
     irrigationLevel: text(raw.irrigationLevel),
     primaryGoal: text(raw.primaryGoal),
+    animals: text(raw.animals) || null,
+    feeding: text(raw.feeding) || null,
+    sunlight: text(raw.sunlight) || null,
+    priority: text(raw.priority) || null,
   };
 }
 

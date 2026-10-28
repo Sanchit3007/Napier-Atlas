@@ -71,7 +71,7 @@ const STRAINS: Prisma.NapierStrainCreateInput[] = [
     origin: 'Thailand (Dr. Krailas Kiyothong, Department of Livestock Development)',
     crudeProtein: 17.0, // breeder: 16–18%
     dryMatter: 23.0,
-    annualYieldTons: 200, // breeder: ~500 t/ha/yr ≈ 200 t/acre, irrigated best case
+    annualYieldTons: 150, // typical: breeder quotes 360–400 t/ha for ordinary Napier (~150 t/acre); 500 t/ha is his best case
     firstHarvestDays: 75, // TNAU: first cut 75–80 days after planting
     ratoonCycleDays: 45, // TNAU: then every 45 days
     maxHeightFeet: 15.0,

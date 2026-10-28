@@ -47,6 +47,10 @@ model SimulationLog {
   bioCngCubicMeters   Float
   stemsRequired       Int
   historyKey          String?  // private random key that groups one visitor's saved estimates
+  animals             String?  // situation answers used for the match score: "cows" | "goats"
+  feeding             String?  // "cut" | "graze"
+  sunlight            String?  // "open" | "shaded"
+  priority            String?  // "tonnage" | "balanced" | "quality"
   createdAt           DateTime @default(now())
 }
 

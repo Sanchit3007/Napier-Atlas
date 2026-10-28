@@ -39,12 +39,27 @@ export default function EstimateReport({ estimate: e }: Readonly<{ estimate: Est
           <dt className="text-[11px] uppercase tracking-wide text-slate-500">Irrigation</dt>
           <dd className="font-semibold">{e.irrigationLevel}</dd>
         </div>
+        {e.situation.map(([label, answer]) => (
+          <div key={label}>
+            <dt className="text-[11px] uppercase tracking-wide text-slate-500">{label}</dt>
+            <dd className="font-semibold">{answer}</dd>
+          </div>
+        ))}
       </dl>
 
       <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
         <div className="text-[11px] uppercase tracking-wide text-emerald-700">Recommended strain</div>
         <div className="text-base font-bold">{e.strainName}</div>
         {!e.soilSuited && <div className="text-xs text-amber-700">Not ideal for {e.soilType}, so yield is reduced by 20%</div>}
+        {e.topMatches.length > 1 && (
+          <ol className="mt-2 text-xs text-slate-700 space-y-0.5">
+            {e.topMatches.map((m, i) => (
+              <li key={m.name}>
+                {i + 1}. {m.name} · {m.score}% match
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
 
       <div className="grid grid-cols-4 gap-2 mb-3">

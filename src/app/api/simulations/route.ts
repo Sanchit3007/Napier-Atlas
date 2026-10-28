@@ -17,9 +17,16 @@ export async function POST(request: Request) {
     const saved = await createSimulation(toSimInput(body as Record<string, unknown>));
     if (!saved.ok) return Response.json({ error: saved.error }, { status: 422 });
 
-    const { strain, projection, ...figures } = saved.result;
+    const { strain, projection, ranking, ...figures } = saved.result;
     return Response.json(
-      { id: saved.id, url: `/simulation/${saved.id}`, recommendedStrain: strain.name, ...figures, projection },
+      {
+        id: saved.id,
+        url: `/simulation/${saved.id}`,
+        recommendedStrain: strain.name,
+        ...figures,
+        projection,
+        ranking: ranking.map((r) => ({ strain: r.strain.name, slug: r.strain.slug, score: r.score, reasons: r.reasons, cautions: r.cautions })),
+      },
       { status: 201 },
     );
   } catch (e) {

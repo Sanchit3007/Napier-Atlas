@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import ProjectionChart from '@/components/ProjectionChart';
 import CopyLinkButton from '@/components/CopyLinkButton';
 import EstimateDownloads from '@/components/EstimateDownloads';
-import { toEstimateExport } from '@/lib/estimate-export';
+import { situationLabels, toEstimateExport } from '@/lib/estimate-export';
 import { getSimulation, getStrains } from '@/lib/strains';
 import { GOALS, cbgKgPerDay, co2AvoidedTons, simulate } from '@/lib/simulator';
 
@@ -40,6 +40,8 @@ async function SimulationDetail({
   // The projection isn't stored, so rebuild it from the saved inputs.
   const result = strain ? simulate([strain], sim) : null;
   const projection = result?.projection ?? null;
+  // Estimates saved with the situation questions also show how every strain ranked.
+  const ranking = sim.priority ? simulate(strains, sim).ranking : null;
   const goal = GOALS.find((g) => g.value === sim.primaryGoal)?.label ?? sim.primaryGoal;
 
   const metrics = [
@@ -77,7 +79,12 @@ async function SimulationDetail({
           <CopyLinkButton />
           {result && (
             <EstimateDownloads
-              estimate={toEstimateExport(sim, result, { savedAt: sim.createdAt, path: `/simulation/${sim.id}` })}
+              estimate={toEstimateExport(
+                sim,
+                result,
+                { savedAt: sim.createdAt, path: `/simulation/${sim.id}` },
+                ranking ?? result.ranking,
+              )}
             />
           )}
         </div>
@@ -91,6 +98,28 @@ async function SimulationDetail({
           </Link>
         ) : (
           <div className="text-2xl font-bold text-white">{sim.recommendedStrain}</div>
+        )}
+        {ranking && (
+          <>
+            <p className="mt-2 text-sm text-slate-400">
+              {situationLabels(sim)
+                .map(([, answer]) => answer)
+                .join(' · ')}
+            </p>
+            <ol className="mt-4 space-y-2">
+              {ranking.map((r, i) => (
+                <li key={r.strain.slug} className="grid grid-cols-[minmax(0,1fr)_4.5rem_2.75rem] sm:grid-cols-[minmax(0,1fr)_10rem_2.75rem] items-center gap-3 text-sm">
+                  <span className={i === 0 ? 'truncate font-semibold text-white' : 'truncate text-slate-300'}>
+                    {i + 1}. {r.strain.name}
+                  </span>
+                  <span className="h-1.5 rounded-full bg-slate-950 overflow-hidden" aria-hidden="true">
+                    <span className="block h-full rounded-full bg-emerald-500" style={{ width: `${r.score}%` }} />
+                  </span>
+                  <span className="font-mono text-right text-slate-300">{r.score}%</span>
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </div>
 

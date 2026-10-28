@@ -3,14 +3,19 @@
 import Link from 'next/link';
 import { useActionState, useMemo, useState, type ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, ArrowRight, Beef, CloudOff, Flame, Fuel, Info, Layers, Loader2, Save, Sprout, Wheat } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Beef, Check, CloudOff, Flame, Fuel, Info, Layers, Loader2, Save, Sprout, Wheat } from 'lucide-react';
 import { clsx } from 'clsx';
 import {
+  ANIMALS,
+  FEEDING,
   GOALS,
   IRRIGATION_LEVELS,
   MAX_ACRES,
   MIN_ACRES,
+  PRIORITIES,
+  SITUATION_DEFAULTS,
   SOIL_TYPES,
+  SUNLIGHT,
   simulate,
   type SimInput,
   type SimStrain,
@@ -29,11 +34,13 @@ export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrai
     soilType: 'Black Cotton',
     irrigationLevel: IRRIGATION_LEVELS[0].value,
     primaryGoal: 'BIO_CNG_BIOMASS',
+    ...SITUATION_DEFAULTS,
   });
   const [state, formAction, pending] = useActionState(saveSimulation, { error: null });
 
   const result = useMemo(() => simulate(strains, input), [strains, input]);
   const fodderShare = GOALS.find((g) => g.value === input.primaryGoal)?.fodderShare ?? 0;
+  const [best, ...others] = result.ranking;
   const set = <K extends keyof SimInput>(key: K, value: SimInput[K]) => setInput((cur) => ({ ...cur, [key]: value }));
 
   return (
@@ -105,6 +112,43 @@ export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrai
             onChange={(v) => set('primaryGoal', v)}
             columns={3}
           />
+          {/* Situation questions: animal ones only matter when some of the harvest is fed. */}
+          {fodderShare > 0 && (
+            <>
+              <Choice
+                legend="Animals you feed"
+                name="animals"
+                options={ANIMALS}
+                value={input.animals ?? SITUATION_DEFAULTS.animals}
+                onChange={(v) => set('animals', v)}
+                columns={2}
+              />
+              <Choice
+                legend="How they eat it"
+                name="feeding"
+                options={FEEDING}
+                value={input.feeding ?? SITUATION_DEFAULTS.feeding}
+                onChange={(v) => set('feeding', v)}
+                columns={2}
+              />
+            </>
+          )}
+          <Choice
+            legend="Sunlight on the plot"
+            name="sunlight"
+            options={SUNLIGHT}
+            value={input.sunlight ?? SITUATION_DEFAULTS.sunlight}
+            onChange={(v) => set('sunlight', v)}
+            columns={2}
+          />
+          <Choice
+            legend="What matters most"
+            name="priority"
+            options={PRIORITIES}
+            value={input.priority ?? SITUATION_DEFAULTS.priority}
+            onChange={(v) => set('priority', v)}
+            columns={3}
+          />
 
           {/* Save, CSV and PDF buttons; kept at the bottom when the results column is taller. */}
           <div className="mt-auto pt-2">
@@ -127,30 +171,45 @@ export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrai
 
         {/* Results */}
         <div className="lg:col-span-3 flex flex-col gap-6" aria-live="polite">
+          {/* Best match, with its match score and the reasons behind it */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={result.strain.slug}
+              key={best.strain.slug}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="rounded-3xl bg-linear-to-br from-emerald-950/60 via-slate-900 to-slate-900 border border-emerald-800/40 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              className="rounded-3xl bg-linear-to-br from-emerald-950/60 via-slate-900 to-slate-900 border border-emerald-800/40 p-6 flex flex-col gap-4"
             >
-              <div>
-                <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-1">Recommended strain</div>
-                <div className="text-2xl font-bold text-white">{result.strain.name}</div>
-                {!result.soilSuited && (
-                  <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-amber-300">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Not ideal for {input.soilType} — yield reduced by 20%
-                  </p>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 mb-1">Best match for your farm</div>
+                  <div className="text-2xl font-bold text-white">{best.strain.name}</div>
+                </div>
+                <div className="flex items-center justify-between sm:flex-col sm:items-end gap-1 shrink-0">
+                  <span className="font-mono text-2xl font-extrabold text-white">
+                    {best.score}%<span className="ml-1 font-sans text-xs font-normal text-slate-400">match</span>
+                  </span>
+                  <Link
+                    href={`/strains/${best.strain.slug}`}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-emerald-300 hover:text-emerald-200"
+                  >
+                    View strain <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               </div>
-              <Link
-                href={`/strains/${result.strain.slug}`}
-                className="inline-flex items-center gap-1 text-sm font-medium text-emerald-300 hover:text-emerald-200 shrink-0"
-              >
-                View strain <ArrowRight className="w-4 h-4" />
-              </Link>
+              <ul className="space-y-1.5 text-sm">
+                {best.reasons.slice(0, 3).map((r) => (
+                  <li key={r} className="flex gap-2 text-slate-200">
+                    <Check className="w-4 h-4 mt-0.5 shrink-0 text-emerald-400" /> {r}
+                  </li>
+                ))}
+                {best.cautions.slice(0, 2).map((c) => (
+                  <li key={c} className="flex gap-2 text-amber-300">
+                    <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /> {c}
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           </AnimatePresence>
 
@@ -180,6 +239,24 @@ export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrai
               <span className="text-slate-400">All biomass goes to fodder — choose a Bio-CNG goal to see gas output.</span>
             )}
           </div>
+
+          {/* The other strains, ranked by match score */}
+          <div className="rounded-2xl bg-slate-900/60 border border-slate-800 px-5 py-4">
+            <h4 className="mb-3 text-xs font-mono uppercase tracking-widest text-slate-400">Other strains, ranked</h4>
+            <ol className="space-y-2.5">
+              {others.map((r, i) => (
+                <li key={r.strain.slug} className="grid grid-cols-[minmax(0,1fr)_4.5rem_2.75rem] sm:grid-cols-[minmax(0,1fr)_8rem_2.75rem] items-center gap-3 text-sm">
+                  <Link href={`/strains/${r.strain.slug}`} className="truncate text-slate-200 hover:text-emerald-300" title={r.reasons[0] ?? r.cautions[0]}>
+                    {i + 2}. {r.strain.name}
+                  </Link>
+                  <span className="h-1.5 rounded-full bg-slate-950 overflow-hidden" aria-hidden="true">
+                    <span className="block h-full rounded-full bg-emerald-500" style={{ width: `${r.score}%` }} />
+                  </span>
+                  <span className="font-mono text-right text-slate-300">{r.score}%</span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
 
@@ -199,7 +276,10 @@ export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrai
         Estimates are for learning purposes, based on the published strain values on each strain page. The
         estimator also assumes 82% of full yield with moderate water, 60% when rainfed and 80% on unsuited soil,
         about 40 kg of green fodder per cow a day, and that 86% of dry matter is organic matter that can make
-        methane. Real output depends on local climate, crop management and digester efficiency.
+        methane. The match score combines output per acre, protein and how well each strain suits your answers
+        (from its published strengths), with a soil it isn&apos;t listed for scoring ×0.75 and, on a shaded plot,
+        strains without a shade trial scoring ×0.8. Real output depends on local climate, crop management and
+        digester efficiency.
       </p>
     </div>
   );
