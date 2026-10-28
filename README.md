@@ -202,11 +202,3 @@ Notes on the data:
 4. Deploy. Strain data is cached for up to an hour, so database changes appear on the live site within that time.
 
 > **Before deploying:** Prisma recommends adding `"postinstall": "prisma generate"` to `package.json` so Vercel always builds with an up-to-date client. `prisma.config.ts` also loads `dotenv`, which is not listed in `package.json`.
-
----
-
-## Known limitations
-
-- The navbar links are hidden on phones until a mobile menu is added. The footer links work on every screen size.
-- The site has no user accounts, by design; history works through private links.
-- Estimates are for learning purposes. Real output depends on local climate, crop management and digester efficiency.
