@@ -78,7 +78,7 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
       </ol>
 
       {/* Five-year harvest calendar */}
-      <div className="rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950/30 border border-emerald-900/40 p-6 sm:p-8">
+      <div className="rounded-3xl bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950/30 border border-emerald-900/40 p-5 sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
           <h3 className="font-semibold text-white">5-year harvest calendar</h3>
           <p className="text-sm text-slate-300">
@@ -87,13 +87,13 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {Array.from({ length: YEARS }, (_, y) => {
             const yearCuts = cuts.filter((d) => d >= y * 365 && d < (y + 1) * 365);
             return (
-              <div key={y} className="grid grid-cols-[4rem_1fr_2.5rem] items-center gap-3">
+              <div key={y} className="grid grid-cols-[3.25rem_1fr_2rem] sm:grid-cols-[4rem_1fr_2.5rem] items-center gap-2 sm:gap-3">
                 <span className="text-xs font-mono text-slate-400">Year {y + 1}</span>
-                <div className="relative h-8 rounded-full bg-slate-950/70 border border-slate-800">
+                <div className="relative h-7 sm:h-8 rounded-full bg-slate-950/70 border border-slate-800">
                   {y === 0 && (
                     <div
                       className="absolute inset-y-0 left-0 rounded-l-full bg-amber-500/10 border-r border-dashed border-amber-500/40"
@@ -101,18 +101,21 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
                       title="Establishment period"
                     />
                   )}
-                  {yearCuts.map((d, i) => (
-                    <motion.span
-                      key={`${strain.slug}-${d}`}
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileInView={{ scale: 1, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: y * 0.1 + i * 0.04 }}
-                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
-                      style={{ left: `${((d - y * 365) / 365) * 100}%` }}
-                      title={`Harvest on day ${d}`}
-                    />
-                  ))}
+                  {/* On phones, an inset track keeps dots at the very start or end of a year inside the bar. */}
+                  <div className="absolute inset-y-0 left-2 right-2 sm:left-0 sm:right-0">
+                    {yearCuts.map((d, i) => (
+                      <motion.span
+                        key={`${strain.slug}-${d}`}
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: y * 0.1 + i * 0.04 }}
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] sm:shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+                        style={{ left: `${((d - y * 365) / 365) * 100}%` }}
+                        title={`Harvest on day ${d}`}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <span className="text-xs font-mono text-slate-300 text-right">{yearCuts.length}×</span>
               </div>

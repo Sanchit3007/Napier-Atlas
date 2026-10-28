@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { Sprout, BookOpen, Calculator, CalendarDays, Workflow } from 'lucide-react';
 import HistoryNavLink from '@/components/HistoryNavLink';
+import MobileMenu from '@/components/MobileMenu';
 
-// Sticky top bar with the logo and section links (links are hidden on phones for now).
+// Sticky top bar with the logo and section links; on phones the links move into the ☰ menu.
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-emerald-900/40 text-white">
@@ -40,6 +41,8 @@ export default function Navbar() {
           <HistoryNavLink />
         </nav>
 
+        {/* Phone menu (☰) */}
+        <MobileMenu />
       </div>
     </header>
   );

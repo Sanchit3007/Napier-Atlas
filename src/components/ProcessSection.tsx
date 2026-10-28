@@ -80,7 +80,7 @@ export default function ProcessSection() {
             animate={{ width: `${(active / (STEPS.length - 1)) * 84}%` }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           />
-          <div role="tablist" aria-label="Bio-CNG production steps" className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div role="tablist" aria-label="Bio-CNG production steps" className="relative grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-4 sm:gap-3">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === active;
@@ -97,11 +97,11 @@ export default function ProcessSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="group flex flex-col items-center text-center gap-3 p-2 rounded-2xl focus-visible:outline-2 focus-visible:outline-emerald-400"
+                  className="group flex flex-col items-center text-center gap-1.5 sm:gap-3 p-1 sm:p-2 rounded-2xl focus-visible:outline-2 focus-visible:outline-emerald-400"
                 >
                   <span
                     className={clsx(
-                      'w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors',
+                      'w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-colors',
                       isActive
                         ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-900/50'
                         : done
@@ -109,10 +109,12 @@ export default function ProcessSection() {
                           : 'bg-slate-900 border-slate-800 text-slate-400 group-hover:border-slate-600',
                     )}
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </span>
-                  <span className="text-[11px] font-mono text-slate-500">STEP {i + 1}</span>
-                  <span className={clsx('text-sm font-semibold', isActive ? 'text-white' : 'text-slate-300')}>{s.title}</span>
+                  <span className="text-[10px] sm:text-[11px] font-mono text-slate-500">STEP {i + 1}</span>
+                  <span className={clsx('text-xs sm:text-sm font-semibold leading-tight sm:leading-normal', isActive ? 'text-white' : 'text-slate-300')}>
+                    {s.title}
+                  </span>
                 </motion.button>
               );
             })}
