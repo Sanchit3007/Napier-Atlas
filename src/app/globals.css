@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #f1f5f9;
 }
 
 @theme inline {
@@ -12,15 +12,138 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Hero grass → gas animation (GrassToGasFlow). Each stage's halo and label light up in turn on a 6 s cycle.
+   Visitors who ask for less motion see a still picture. */
+.hf .sway,
+.hf .breathe,
+.hf .flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.hf .flow {
+  stroke-dasharray: 4 10;
+}
+.hf .needle {
+  transform-box: view-box;
+  transform-origin: 278px 192px;
+}
+.hf .halo {
+  opacity: 0;
+}
+.hf .stage {
+  border: 1px solid transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hf-in { animation: hf-in 0.7s ease 0.4s both; }
+  .hf .sway { animation: hf-sway 3.2s ease-in-out infinite; }
+  .hf .bit { animation: hf-belt 1.8s linear infinite; }
+  .hf .breathe { animation: hf-breathe 4s ease-in-out infinite; }
+  .hf .slosh { animation: hf-slosh 3s ease-in-out infinite; }
+  .hf .rise { animation: hf-rise 2.6s ease-in infinite; }
+  .hf .rise2 { animation: hf-rise2 2.2s ease-in infinite; }
+  .hf .flow { animation: hf-flow 0.9s linear infinite; }
+  .hf .needle { animation: hf-needle 4s ease-in-out infinite; }
+  .hf .chg { animation: hf-charge 6s ease-in-out infinite; }
+  .hf .halo { animation: hf-halo 6s ease-in-out infinite; }
+  .hf .stage { animation: hf-stage 6s ease-in-out infinite; }
+  .hf .flame { animation: hf-flame 1.4s ease-in-out infinite; }
+}
+
+@keyframes hf-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hf-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes hf-belt {
+  0% { transform: translateX(0); opacity: 0; }
+  12%, 85% { opacity: 1; }
+  100% { transform: translateX(64px); opacity: 0; }
+}
+@keyframes hf-breathe {
+  0%, 100% { transform: scaleY(0.9); }
+  50% { transform: scaleY(1); }
+}
+@keyframes hf-slosh {
+  0%, 100% { transform: translateX(-24px); }
+  50% { transform: translateX(0); }
+}
+@keyframes hf-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translateY(-52px); opacity: 0; }
+}
+@keyframes hf-rise2 {
+  0% { transform: translateY(0); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(-58px); opacity: 0; }
+}
+@keyframes hf-flow {
+  to { stroke-dashoffset: -28; }
+}
+@keyframes hf-needle {
+  0%, 100% { transform: rotate(-40deg); }
+  50% { transform: rotate(35deg); }
+}
+@keyframes hf-charge {
+  0%, 88%, 100% { opacity: 0.1; }
+  8%, 72% { opacity: 1; }
+}
+@keyframes hf-halo {
+  0%, 30%, 100% { opacity: 0; }
+  8%, 22% { opacity: 1; }
+}
+@keyframes hf-stage {
+  0%, 30%, 100% { background: transparent; border-color: transparent; }
+  8%, 22% { background: rgb(16 185 129 / 0.12); border-color: rgb(16 185 129 / 0.45); }
+}
+@keyframes hf-flame {
+  0%, 100% { transform: scale(0.9, 0.85); opacity: 0.85; }
+  50% { transform: scale(1, 1.08); opacity: 1; }
+}
+
+/* "Save as PDF": EstimateDownloads copies the estimate report into #print-root and prints only that. */
+#print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html.printing,
+  html.printing body {
+    background: #fff;
+    color-scheme: light;
+  }
+
+  html.printing body > :not(#print-root) {
+    display: none;
+  }
+
+  html.printing #print-root {
+    display: block;
+    print-color-adjust: exact;
+  }
 }

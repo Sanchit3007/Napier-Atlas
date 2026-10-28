@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Module 3: Napier Grass Varieties & Scientific Data
+model NapierStrain {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String   // e.g., "Super Napier (Pakchong-1)"
+  slug             String   @unique
+  scientificName   String   // "Pennisetum purpureum x Pennisetum glaucum"
+  origin           String   // e.g., "Thailand (Dept. of Livestock Development)"
+  crudeProtein     Float    // % on Dry Matter basis (e.g., 17.2)
+  dryMatter        Float    // % of Fresh Weight (e.g., 23.0)
+  annualYieldTons  Int      // Tons per acre per year (e.g., 185)
+  firstHarvestDays Int      // Days to 1st cut (e.g., 75)
+  ratoonCycleDays  Int      // Days between subsequent cuts (e.g., 45)
+  maxHeightFeet    Float    // Maximum canopy height (e.g., 15.0)
+  bioCngPotential  String   // Methane output rating
+  suitableSoils    String[] // ["Black Cotton", "Loamy", "Red Soil", "Alluvial"]
+  waterRequirement String   // Irrigation interval details
+  keyHighlights    String[] // Bullet points for comparison UI
+  bestFor          String   // Primary use-case tag
+  sources          StrainSource[] // Published references behind the figures above
+  createdAt        DateTime @default(now())
+}
+
+type StrainSource {
+  label String // e.g., "Philippine Carabao Center – Super Napier seminar"
+  url   String
+}
+
+// Module 5: Biomass, Cattle & Bio-CNG Simulator Logs
+model SimulationLog {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  landAcres           Float
+  soilType            String
+  irrigationLevel     String
+  primaryGoal         String   // "DAIRY_FODDER" | "BIO_CNG_BIOMASS" | "DUAL_PURPOSE"
+  recommendedStrain   String
+  estimatedAnnualTons Float
+  cattleSupported     Int
+  bioCngCubicMeters   Float
+  stemsRequired       Int
+  historyKey          String?  // private random key that groups one visitor's saved estimates
+  createdAt           DateTime @default(now())
+}
+
+// Module 6 (dropped): consultation inquiries. No longer used by the site.
+model ConsultationInquiry {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullName      String
+  organization  String?
+  email         String
+  phone         String
+  region        String   // State / District
+  landSizeAcres Float
+  inquiryType   String   // "CULTIVATION_GUIDANCE" | "BIO_CNG_FEEDSTOCK" | "SOIL_TESTING"
+  message       String
+  status        String   @default("NEW") // "NEW" | "IN_REVIEW" | "RESOLVED"
+  createdAt     DateTime @default(now())
+}
