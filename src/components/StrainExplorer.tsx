@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Check, Plus, Search, X } from 'lucide-react';
+import { ArrowRight, Check, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts';
 import type { NapierStrain } from '@prisma/client';
 import { clsx } from 'clsx';
@@ -21,13 +21,13 @@ const COMPARE_COLORS = ['#10b981', '#f59e0b', '#38bdf8']; // one colour per comp
 const MAX_COMPARE = 3;
 
 // Strain cards with soil filter, search and sort, plus side-by-side compare of up to 3 strains.
-export default function StrainExplorer({ strains }: { strains: NapierStrain[] }) {
+export default function StrainExplorer({ strains }: Readonly<{ strains: NapierStrain[] }>) {
   const [query, setQuery] = useState('');
   const [soil, setSoil] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState('cng');
   const [compare, setCompare] = useState<string[]>([]);
 
-  const soils = useMemo(() => [...new Set(strains.flatMap((s) => s.suitableSoils))].sort(), [strains]);
+  const soils = useMemo(() => [...new Set(strains.flatMap((s) => s.suitableSoils))].sort((a, b) => a.localeCompare(b)), [strains]);
 
   const visible = useMemo(() => {
     const sort = SORTS.find((s) => s.key === sortKey)!;
@@ -40,16 +40,28 @@ export default function StrainExplorer({ strains }: { strains: NapierStrain[] })
 
   const compared = compare.map((slug) => strains.find((s) => s.slug === slug)!);
 
+  // Adds or removes a strain from the comparison (at most MAX_COMPARE at once).
   const toggleCompare = (slug: string) =>
-    setCompare((cur) =>
-      cur.includes(slug) ? cur.filter((s) => s !== slug) : cur.length < MAX_COMPARE ? [...cur, slug] : cur,
-    );
+    setCompare((cur) => {
+      if (cur.includes(slug)) return cur.filter((s) => s !== slug);
+      return cur.length < MAX_COMPARE ? [...cur, slug] : cur;
+    });
 
   return (
     <div>
-      {/* Filters */}
+      {/* Filters: phones get a search box and a filter sheet; tablets and laptops get the row below. */}
       <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
+        <MobileFilters
+          query={query}
+          setQuery={setQuery}
+          soil={soil}
+          setSoil={setSoil}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          soils={soils}
+          count={visible.length}
+        />
+        <div className="hidden sm:flex sm:flex-row sm:flex-wrap gap-3 sm:items-center">
           <label className="relative">
             <span className="sr-only">Search strains</span>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
@@ -192,8 +204,184 @@ export default function StrainExplorer({ strains }: { strains: NapierStrain[] })
   );
 }
 
+// Phones only: search plus a filter button that opens Soil and Sort in a sheet sliding up from the bottom.
+function MobileFilters({
+  query,
+  setQuery,
+  soil,
+  setSoil,
+  sortKey,
+  setSortKey,
+  soils,
+  count,
+}: Readonly<{
+  query: string;
+  setQuery: (q: string) => void;
+  soil: string | null;
+  setSoil: (s: string | null) => void;
+  sortKey: string;
+  setSortKey: (k: string) => void;
+  soils: string[];
+  count: number;
+}>) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const active = (soil ? 1 : 0) + (sortKey === 'cng' ? 0 : 1);
+  const sortLabel = SORTS.find((s) => s.key === sortKey)!.label;
+
+  const close = () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  // While open: Escape closes, the page behind stops scrolling, and focus moves into the sheet.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    sheetRef.current?.focus();
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [open]);
+
+  const chip = (on: boolean) =>
+    clsx(
+      'px-3.5 py-2 rounded-full text-sm border transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400',
+      on ? 'bg-emerald-500/15 border-emerald-500/60 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-300',
+    );
+
+  return (
+    <div className="sm:hidden">
+      <div className="flex gap-2">
+        <label className="relative flex-1">
+          <span className="sr-only">Search strains</span>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search name, origin, use…"
+            className="w-full h-11 bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 text-base text-slate-200 placeholder:text-slate-500 focus-visible:outline-2 focus-visible:outline-emerald-400"
+          />
+        </label>
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          aria-label={active ? `Filters (${active} active)` : 'Filters'}
+          className={clsx(
+            'relative w-11 h-11 shrink-0 rounded-xl border bg-slate-900 flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400',
+            active ? 'border-emerald-500/60 text-emerald-300' : 'border-slate-800 text-slate-300',
+          )}
+        >
+          <SlidersHorizontal className="w-5 h-5" />
+          {active > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 px-1 rounded-full bg-emerald-500 text-[11px] font-bold leading-4.5 text-emerald-950">
+              {active}
+            </span>
+          )}
+        </button>
+      </div>
+      <p className="mt-2.5 text-xs text-slate-400">
+        {soil ? `${soil} · ` : ''}Sorted by {sortLabel} · {count} {count === 1 ? 'strain' : 'strains'}
+      </p>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-60"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="filter-sheet-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <button type="button" aria-label="Close filters" onClick={close} className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" />
+            <motion.div
+              ref={sheetRef}
+              tabIndex={-1}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-slate-700 bg-slate-900 px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5 outline-none"
+            >
+              <div className="mx-auto h-1 w-10 rounded-full bg-slate-700" />
+              <div className="flex items-center justify-between">
+                <h3 id="filter-sheet-title" className="text-base font-semibold text-white">
+                  Filter strains
+                </h3>
+                <button type="button" onClick={close} aria-label="Close filters" className="w-9 h-9 -mr-2 rounded-lg flex items-center justify-center text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <fieldset>
+                <legend className="mb-2 text-xs font-mono uppercase tracking-widest text-slate-400">Soil</legend>
+                <div className="flex flex-wrap gap-2">
+                  {[null, ...soils].map((s) => (
+                    <button key={s ?? 'all'} type="button" onClick={() => setSoil(s)} aria-pressed={soil === s} className={chip(soil === s)}>
+                      {s ?? 'All soils'}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-2 text-xs font-mono uppercase tracking-widest text-slate-400">Sort by</legend>
+                <div className="space-y-1">
+                  {SORTS.map((s) => (
+                    <label key={s.key} className="flex items-center gap-3 min-h-11 px-3 rounded-xl text-sm text-slate-200 has-checked:bg-slate-800">
+                      <input
+                        type="radio"
+                        name="mobile-sort"
+                        value={s.key}
+                        checked={sortKey === s.key}
+                        onChange={() => setSortKey(s.key)}
+                        className="w-4 h-4 accent-emerald-500"
+                      />
+                      {s.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="grid grid-cols-[auto_1fr] gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSoil(null);
+                    setSortKey('cng');
+                  }}
+                  className="h-11 px-4 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200"
+                >
+                  Reset
+                </button>
+                <button type="button" onClick={close} className="h-11 rounded-xl bg-emerald-700 text-sm font-semibold text-white">
+                  Show {count} {count === 1 ? 'strain' : 'strains'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // One small figure box on a strain card, e.g. "17% Protein".
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ label, value }: Readonly<{ label: string; value: string | number }>) {
   return (
     // Keeps every number at the top of its box, even when the label wraps to two lines.
     <div className="flex flex-col-reverse justify-end rounded-xl bg-slate-950/60 border border-slate-800 px-2 py-2 text-center">
@@ -214,7 +402,7 @@ const METRICS = [
 ];
 
 // Radar chart and table comparing the selected strains; the best value in each row is highlighted.
-function Comparison({ strains }: { strains: NapierStrain[] }) {
+function Comparison({ strains }: Readonly<{ strains: NapierStrain[] }>) {
   // Scores are relative to the best strain in the comparison (100 = best).
   const radarData = METRICS.map((m) => {
     const values = strains.map(m.value);

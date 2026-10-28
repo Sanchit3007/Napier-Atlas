@@ -185,14 +185,16 @@ const RENAMED: [from: string, to: string][] = [
 async function main() {
   // Updates strains in place, so saved estimates and visitors' history are kept.
   console.log('🌿 Updating 5 Napier grass strains from published sources...');
-  for (const strain of STRAINS) {
-    await prisma.napierStrain.upsert({ where: { slug: strain.slug }, update: strain, create: strain });
-  }
+  await Promise.all(
+    STRAINS.map((strain) => prisma.napierStrain.upsert({ where: { slug: strain.slug }, update: strain, create: strain })),
+  );
 
   // Saved estimates find their strain by name, so carry renamed strains over.
-  for (const [from, to] of RENAMED) {
-    await prisma.simulationLog.updateMany({ where: { recommendedStrain: from }, data: { recommendedStrain: to } });
-  }
+  await Promise.all(
+    RENAMED.map(([from, to]) =>
+      prisma.simulationLog.updateMany({ where: { recommendedStrain: from }, data: { recommendedStrain: to } }),
+    ),
+  );
 
   // The consultation inquiries were placeholder records for the dropped Module 6.
   const removed = await prisma.consultationInquiry.deleteMany();

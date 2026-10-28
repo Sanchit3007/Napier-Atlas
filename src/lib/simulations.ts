@@ -6,13 +6,16 @@ export type CreateSimulationResult =
   | { ok: true; id: string; result: SimResult }
   | { ok: false; error: string };
 
+// Keeps a field only if it is text; anything else becomes "" and fails validation.
+const text = (value: unknown) => (typeof value === 'string' ? value : '');
+
 // Turns raw form or API fields into a typed estimator input.
 export function toSimInput(raw: Record<string, unknown>): SimInput {
   return {
     landAcres: Number(raw.landAcres),
-    soilType: String(raw.soilType ?? ''),
-    irrigationLevel: String(raw.irrigationLevel ?? ''),
-    primaryGoal: String(raw.primaryGoal ?? ''),
+    soilType: text(raw.soilType),
+    irrigationLevel: text(raw.irrigationLevel),
+    primaryGoal: text(raw.primaryGoal),
   };
 }
 

@@ -6,7 +6,7 @@ import { AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 // Friendly error page with "Try again" and "Back to home", shown when a page fails to load.
-export default function Error({ error, retry }: { error: unknown; retry: () => void }) {
+export default function ErrorPage({ error, retry }: Readonly<{ error: unknown; retry: () => void }>) {
   useEffect(() => {
     // Details stay in the logs; the visitor only sees the friendly message below.
     console.error(error);

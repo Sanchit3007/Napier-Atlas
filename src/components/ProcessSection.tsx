@@ -71,8 +71,37 @@ export default function ProcessSection() {
           </p>
         </div>
 
-        {/* Step selector */}
-        <div className="relative mb-8">
+        {/* Phones: six numbered dots on one line, with a line that fills as you move through the steps */}
+        <div className="sm:hidden relative mb-6 px-1">
+          <div className="absolute left-5 right-5 top-4 h-0.5 rounded-full bg-slate-800" />
+          <div
+            className="absolute left-5 top-4 h-0.5 rounded-full bg-linear-to-r from-emerald-500 to-amber-400 transition-[width] duration-300"
+            style={{ width: `calc((100% - 2.5rem) * ${active / (STEPS.length - 1)})` }}
+          />
+          <ol className="relative flex justify-between" aria-label="Bio-CNG production steps">
+            {STEPS.map((s, i) => (
+              <li key={s.title}>
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-current={i === active ? 'step' : undefined}
+                  aria-label={`Step ${i + 1}: ${s.title}`}
+                  className={clsx(
+                    'w-8 h-8 rounded-full border font-mono text-[13px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400',
+                    i === active && 'bg-emerald-500 border-emerald-400 text-white ring-4 ring-emerald-500/20',
+                    i < active && 'bg-emerald-950 border-emerald-800/70 text-emerald-400',
+                    i > active && 'bg-slate-900 border-slate-800 text-slate-400',
+                  )}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Tablets and laptops: icon step selector */}
+        <div className="hidden sm:block relative mb-8">
           <div className="hidden lg:block absolute top-7 left-[8%] right-[8%] h-px bg-slate-800" />
           <motion.div
             className="hidden lg:block absolute top-7 left-[8%] h-px bg-linear-to-r from-emerald-500 to-amber-400 origin-left"
@@ -80,7 +109,7 @@ export default function ProcessSection() {
             animate={{ width: `${(active / (STEPS.length - 1)) * 84}%` }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
           />
-          <div role="tablist" aria-label="Bio-CNG production steps" className="relative grid grid-cols-3 lg:grid-cols-6 gap-x-2 gap-y-4 sm:gap-3">
+          <div role="tablist" aria-label="Bio-CNG production steps" className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === active;
@@ -97,24 +126,20 @@ export default function ProcessSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
-                  className="group flex flex-col items-center text-center gap-1.5 sm:gap-3 p-1 sm:p-2 rounded-2xl focus-visible:outline-2 focus-visible:outline-emerald-400"
+                  className="group flex flex-col items-center text-center gap-3 p-2 rounded-2xl focus-visible:outline-2 focus-visible:outline-emerald-400"
                 >
                   <span
                     className={clsx(
-                      'w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-colors',
-                      isActive
-                        ? 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-900/50'
-                        : done
-                          ? 'bg-emerald-950 border-emerald-800/60 text-emerald-400'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 group-hover:border-slate-600',
+                      'w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors',
+                      isActive && 'bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-900/50',
+                      done && 'bg-emerald-950 border-emerald-800/60 text-emerald-400',
+                      !isActive && !done && 'bg-slate-900 border-slate-800 text-slate-400 group-hover:border-slate-600',
                     )}
                   >
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Icon className="w-6 h-6" />
                   </span>
-                  <span className="text-[10px] sm:text-[11px] font-mono text-slate-500">STEP {i + 1}</span>
-                  <span className={clsx('text-xs sm:text-sm font-semibold leading-tight sm:leading-normal', isActive ? 'text-white' : 'text-slate-300')}>
-                    {s.title}
-                  </span>
+                  <span className="text-[11px] font-mono text-slate-500">STEP {i + 1}</span>
+                  <span className={clsx('text-sm font-semibold', isActive ? 'text-white' : 'text-slate-300')}>{s.title}</span>
                 </motion.button>
               );
             })}

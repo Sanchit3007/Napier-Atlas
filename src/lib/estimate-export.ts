@@ -56,7 +56,7 @@ export function estimateFileName(e: EstimateExport, date: Date) {
 
 const cell = (value: string | number) => {
   const s = String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
 };
 
 // The CSV file: inputs and results first, then the 5-year projection table.

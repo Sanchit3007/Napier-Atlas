@@ -7,7 +7,7 @@ const format = (n: number, decimals: number) =>
   n.toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
 // A number that counts up to its value once it scrolls into view (and from old to new when it changes).
-export default function CountUp({ value, decimals = 0 }: { value: number; decimals?: number }) {
+export default function CountUp({ value, decimals = 0 }: Readonly<{ value: number; decimals?: number }>) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useRef(0);
   const inView = useInView(ref, { once: true });

@@ -6,7 +6,7 @@ export default function Loading() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <Navbar />
-      <div role="status" aria-label="Loading page" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <output aria-label="Loading page" className="block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="motion-safe:animate-pulse">
           <div className="h-3.5 w-40 rounded-md bg-teal-900/70 mb-5" />
           <div className="h-10 w-full max-w-lg rounded-lg bg-slate-800 mb-5" />
@@ -23,7 +23,7 @@ export default function Loading() {
           <Loader2 className="w-4.5 h-4.5 text-emerald-400 motion-safe:animate-spin" />
           Loading Napier data…
         </p>
-      </div>
+      </output>
     </main>
   );
 }

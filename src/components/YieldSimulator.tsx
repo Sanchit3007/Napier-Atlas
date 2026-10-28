@@ -23,7 +23,7 @@ import { toEstimateExport } from '@/lib/estimate-export';
 import { ensureHistoryKey } from '@/lib/history';
 
 // Bio-CNG estimator: choose land, soil, water and goal to see the best strain, outputs and a 5-year chart.
-export default function YieldSimulator({ strains }: { strains: SimStrain[] }) {
+export default function YieldSimulator({ strains }: Readonly<{ strains: SimStrain[] }>) {
   const [input, setInput] = useState<SimInput>({
     landAcres: 10,
     soilType: 'Black Cotton',
@@ -213,14 +213,14 @@ function Choice({
   value,
   onChange,
   columns,
-}: {
+}: Readonly<{
   legend: string;
   name: string;
   options: { value: string; label: string }[];
   value: string;
   onChange: (v: string) => void;
   columns: 2 | 3;
-}) {
+}>) {
   return (
     <fieldset>
       <legend className="text-sm font-medium text-slate-200 mb-3">{legend}</legend>
@@ -266,13 +266,13 @@ function Metric({
   label,
   unit,
   value,
-}: {
+}: Readonly<{
   icon: ComponentType<{ className?: string }>;
   tone: keyof typeof TONES;
   label: string;
   unit: string;
   value: number;
-}) {
+}>) {
   return (
     <div className="rounded-3xl bg-slate-900 border border-slate-800 p-5">
       <div className={clsx('w-10 h-10 rounded-xl border flex items-center justify-center mb-4', TONES[tone])}>

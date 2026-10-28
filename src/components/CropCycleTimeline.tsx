@@ -11,7 +11,7 @@ const YEARS = 5; // length of the example harvest calendar
 const ROOTING_DAY = 30; // roots and first tillers are established about a month after planting
 
 // Pick a strain to see its growth milestones and a 5-year harvest calendar.
-export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] }) {
+export default function CropCycleTimeline({ strains }: Readonly<{ strains: CycleStrain[] }>) {
   const [slug, setSlug] = useState(
     strains.find((s) => s.slug === 'super-napier-pakchong-1')?.slug ?? strains[0]?.slug,
   );
@@ -24,6 +24,16 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
     return days;
   }, [strain]);
 
+  // The same harvest days split into one list per year (year 1 to 5).
+  const years = useMemo(
+    () =>
+      Array.from({ length: YEARS }, (_, y) => ({
+        year: y + 1,
+        cuts: cuts.filter((d) => d >= y * 365 && d < (y + 1) * 365),
+      })),
+    [cuts],
+  );
+
   const milestones = [
     { icon: Sprout, day: 'Day 0', title: 'Stem planting', text: 'Two-node stem cuttings go into moist soil.' },
     { icon: Waypoints, day: `Day ${ROOTING_DAY}`, title: 'Rooting & tillering', text: 'Roots establish and new shoots (tillers) appear.' },
@@ -33,7 +43,8 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Choose a strain">
+      <fieldset className="flex flex-wrap gap-2 min-w-0">
+        <legend className="sr-only">Choose a strain</legend>
         {strains.map((s) => (
           <button
             key={s.slug}
@@ -49,7 +60,7 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
             {s.name.split(' (')[0]}
           </button>
         ))}
-      </div>
+      </fieldset>
 
       {/* Milestones */}
       <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -87,47 +98,88 @@ export default function CropCycleTimeline({ strains }: { strains: CycleStrain[] 
           </p>
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          {Array.from({ length: YEARS }, (_, y) => {
-            const yearCuts = cuts.filter((d) => d >= y * 365 && d < (y + 1) * 365);
-            return (
-              <div key={y} className="grid grid-cols-[3.25rem_1fr_2rem] sm:grid-cols-[4rem_1fr_2.5rem] items-center gap-2 sm:gap-3">
-                <span className="text-xs font-mono text-slate-400">Year {y + 1}</span>
-                <div className="relative h-7 sm:h-8 rounded-full bg-slate-950/70 border border-slate-800">
-                  {y === 0 && (
-                    <div
-                      className="absolute inset-y-0 left-0 rounded-l-full bg-amber-500/10 border-r border-dashed border-amber-500/40"
-                      style={{ width: `${(strain.firstHarvestDays / 365) * 100}%` }}
-                      title="Establishment period"
+        {/* Phones: one thin line per year, with a dot on each harvest day */}
+        <div className="sm:hidden space-y-3">
+          {years.map(({ year, cuts: yearCuts }) => (
+            <div key={year} className="grid grid-cols-[1.5rem_1fr_1.5rem] items-center gap-2">
+              <span className="text-[11px] font-mono font-semibold text-slate-400">Y{year}</span>
+              <div className="relative h-3">
+                <span className="absolute inset-x-0 top-1.25 h-0.5 rounded-full bg-slate-700" />
+                {year === 1 && (
+                  <span
+                    className="absolute left-0 top-1.25 border-t-2 border-dashed border-amber-500/75"
+                    style={{ width: `${(strain.firstHarvestDays / 365) * 100}%` }}
+                    title="Growing before the first cut"
+                  />
+                )}
+                <div className="absolute inset-y-0 left-1 right-1">
+                  {yearCuts.map((d, i) => (
+                    <motion.span
+                      key={`${strain.slug}-${d}`}
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: (year - 1) * 0.1 + i * 0.04 }}
+                      className="absolute top-0.5 -ml-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-slate-900"
+                      style={{ left: `${((d - (year - 1) * 365) / 365) * 100}%` }}
+                      title={`Harvest on day ${d}`}
                     />
-                  )}
-                  {/* On phones, an inset track keeps dots at the very start or end of a year inside the bar. */}
-                  <div className="absolute inset-y-0 left-2 right-2 sm:left-0 sm:right-0">
-                    {yearCuts.map((d, i) => (
-                      <motion.span
-                        key={`${strain.slug}-${d}`}
-                        initial={{ scale: 0, opacity: 0 }}
-                        whileInView={{ scale: 1, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: y * 0.1 + i * 0.04 }}
-                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] sm:shadow-[0_0_10px_rgba(52,211,153,0.6)]"
-                        style={{ left: `${((d - y * 365) / 365) * 100}%` }}
-                        title={`Harvest on day ${d}`}
-                      />
-                    ))}
-                  </div>
+                  ))}
                 </div>
-                <span className="text-xs font-mono text-slate-300 text-right">{yearCuts.length}×</span>
               </div>
-            );
-          })}
+              <span className="text-[11px] font-mono font-semibold text-slate-300 text-right">{yearCuts.length}×</span>
+            </div>
+          ))}
+          <div className="grid grid-cols-[1.5rem_1fr_1.5rem] gap-2 pt-1">
+            <span />
+            <div className="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>Month 1</span>
+              <span>6</span>
+              <span>12</span>
+            </div>
+            <span />
+          </div>
+        </div>
+
+        {/* Tablets and laptops: one bar per year with glowing harvest dots */}
+        <div className="hidden sm:block space-y-4">
+          {years.map(({ year, cuts: yearCuts }) => (
+            <div key={year} className="grid grid-cols-[4rem_1fr_2.5rem] items-center gap-3">
+              <span className="text-xs font-mono text-slate-400">Year {year}</span>
+              <div className="relative h-8 rounded-full bg-slate-950/70 border border-slate-800">
+                {year === 1 && (
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-l-full bg-amber-500/10 border-r border-dashed border-amber-500/40"
+                    style={{ width: `${(strain.firstHarvestDays / 365) * 100}%` }}
+                    title="Establishment period"
+                  />
+                )}
+                {yearCuts.map((d, i) => (
+                  <motion.span
+                    key={`${strain.slug}-${d}`}
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: (year - 1) * 0.1 + i * 0.04 }}
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+                    style={{ left: `${((d - (year - 1) * 365) / 365) * 100}%` }}
+                    title={`Harvest on day ${d}`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs font-mono text-slate-300 text-right">{yearCuts.length}×</span>
+            </div>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-xs text-slate-400">
           <span className="inline-flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-400" /> Harvest
+            <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-emerald-400" /> Harvest
           </span>
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-2 sm:hidden">
+            <span className="w-4 border-t-2 border-dashed border-amber-500/75" /> Growing before first cut
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-2">
             <span className="w-4 h-3 rounded-sm bg-amber-500/20 border border-dashed border-amber-500/40" /> Establishment
             before first cut
           </span>

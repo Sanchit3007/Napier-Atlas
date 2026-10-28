@@ -77,8 +77,13 @@ export type SimResult = {
 
 // Reads the methane figure from a strain's text, e.g. "Up to ~250 m³ CH₄ …" → 250 (null if there is none).
 export function publishedMethane(strain: Pick<SimStrain, 'bioCngPotential'>) {
-  const match = /(\d+) ?m³/.exec(strain.bioCngPotential);
-  return match ? Number(match[1]) : null;
+  const unitAt = strain.bioCngPotential.indexOf('m³');
+  if (unitAt === -1) return null;
+  // Walk back over the digits just before "m³".
+  const before = strain.bioCngPotential.slice(0, unitAt).trimEnd();
+  let start = before.length;
+  while (start > 0 && before[start - 1] >= '0' && before[start - 1] <= '9') start--;
+  return start < before.length ? Number(before.slice(start)) : null;
 }
 
 // Leafy strains without a published figure get a conservative default for calculations.
@@ -118,10 +123,8 @@ function recommendStrain(strains: SimStrain[], input: SimInput) {
   });
   const maxDairy = Math.max(...scored.map((s) => s.dairy));
   const maxCng = Math.max(...scored.map((s) => s.cng));
-  return scored.reduce((best, s) => {
-    const score = (x: typeof s) => share * (x.dairy / maxDairy) + (1 - share) * (x.cng / maxCng);
-    return score(s) > score(best) ? s : best;
-  }).strain;
+  const score = (x: (typeof scored)[number]) => share * (x.dairy / maxDairy) + (1 - share) * (x.cng / maxCng);
+  return scored.reduce((best, s) => (score(s) > score(best) ? s : best), scored[0]).strain;
 }
 
 // Full estimate: picks the best strain, then works out biomass, gas, CO₂, cattle and the 5-year projection.
