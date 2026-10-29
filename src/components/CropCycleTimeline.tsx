@@ -130,15 +130,6 @@ export default function CropCycleTimeline({ strains }: Readonly<{ strains: Cycle
               <span className="text-[11px] font-mono font-semibold text-slate-300 text-right">{yearCuts.length}×</span>
             </div>
           ))}
-          <div className="grid grid-cols-[1.5rem_1fr_1.5rem] gap-2 pt-1">
-            <span />
-            <div className="flex justify-between text-[10px] font-mono text-slate-400">
-              <span>Month 1</span>
-              <span>6</span>
-              <span>12</span>
-            </div>
-            <span />
-          </div>
         </div>
 
         {/* Tablets and laptops: one bar per year with glowing harvest dots */}
