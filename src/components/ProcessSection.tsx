@@ -61,7 +61,7 @@ export default function ProcessSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mb-12">
           <div className="inline-flex items-center gap-2 text-emerald-400 text-xs font-mono uppercase tracking-widest mb-3">
-            <Workflow className="w-4 h-4" /> From Grass to Gas
+            <Workflow className="w-4 h-4" /> How It Works
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3">
             How Napier grass becomes Bio-CNG
