@@ -17,9 +17,9 @@ export default function CopyLinkButton({ label = 'Copy share link' }: Readonly<{
   return (
     <button
       onClick={copy}
-      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-sm font-medium text-slate-200 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400"
+      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-line hover:border-line text-sm font-medium text-ink transition-colors focus-visible:outline-2 focus-visible:outline-fern"
     >
-      {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Link2 className="w-4 h-4" />}
+      {copied ? <Check className="w-4 h-4 text-fern" /> : <Link2 className="w-4 h-4" />}
       {copied ? 'Link copied' : label}
     </button>
   );

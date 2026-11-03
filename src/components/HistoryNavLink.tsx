@@ -9,8 +9,8 @@ export default function HistoryNavLink() {
   const key = useHistoryKey();
 
   return (
-    <Link href={key ? `/history/${key}` : '/history'} className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-      <History className="w-4 h-4 text-emerald-500" /> View History
+    <Link href={key ? `/history/${key}` : '/history'} className="hover:text-fern-dark transition-colors flex items-center gap-1.5">
+      <History className="w-4 h-4 text-fern" /> View History
     </Link>
   );
 }

@@ -4,7 +4,8 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { PointerEvent, ReactNode } from 'react';
 import { clsx } from 'clsx';
 
-// A hero fact card that fades in when scrolled into view, with a soft glow that follows the mouse.
+// A hero fact card that fades in when scrolled into view, with a soft glow that follows the mouse. Once in view it
+// gets data-in, which starts its small drawing (CSS under "Hero fact cards" in globals.css). Hovering lifts it.
 export default function BentoCard({
   index,
   glow,
@@ -31,8 +32,13 @@ export default function BentoCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
+      onViewportEnter={(entry) => entry?.target.setAttribute('data-in', '')}
       onPointerMove={track}
-      className={clsx('group relative isolate overflow-hidden transition-colors duration-200', className)}
+      className={clsx(
+        'group relative isolate overflow-hidden transition-[translate,box-shadow,border-color] duration-300',
+        'hover:-translate-y-0.75 hover:shadow-[0_10px_24px_-14px_rgb(24_38_15/0.45)] motion-reduce:hover:translate-y-0',
+        className,
+      )}
     >
       {/* The pointer glow: drawn above the card's background but below its text. */}
       <div

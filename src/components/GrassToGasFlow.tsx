@@ -25,7 +25,7 @@ export default function GrassToGasFlow() {
       className="hf hf-in relative rounded-[28px] border border-emerald-800/45 px-5 pt-6 pb-4.5 sm:px-5.5"
       style={{
         background:
-          'radial-gradient(420px 220px at 50% 60%, rgb(16 185 129 / 0.10), transparent 70%), linear-gradient(135deg, rgb(2 44 34 / 0.55), #0f172a)',
+          'radial-gradient(420px 220px at 50% 60%, rgb(16 185 129 / 0.10), transparent 70%), linear-gradient(135deg, rgb(2 44 34 / 0.55), #17240f)',
       }}
     >
       <div className="mb-1 text-xs font-mono uppercase tracking-widest text-emerald-400">From grass to gas</div>

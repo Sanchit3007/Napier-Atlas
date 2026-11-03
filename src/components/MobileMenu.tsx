@@ -45,7 +45,7 @@ export default function MobileMenu() {
         aria-expanded={open}
         aria-controls="mobile-menu"
         aria-label={open ? 'Close menu' : 'Open menu'}
-        className="w-11 h-11 rounded-xl border border-slate-800 bg-slate-900 flex items-center justify-center text-slate-200 hover:border-slate-700 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400"
+        className="w-11 h-11 rounded-xl border border-line bg-card flex items-center justify-center text-ink hover:border-line transition-all focus-visible:outline-2 focus-visible:outline-fern group-data-compact/nav:w-10 group-data-compact/nav:h-10 group-data-compact/nav:rounded-full"
       >
         {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -54,7 +54,7 @@ export default function MobileMenu() {
         <nav
           id="mobile-menu"
           aria-label="Main"
-          className="absolute left-0 right-0 top-full border-b border-emerald-900/40 bg-slate-900/95 backdrop-blur-md shadow-xl shadow-black/40"
+          className="absolute left-0 right-0 top-full border-b border-line bg-card/95 backdrop-blur-md shadow-xl shadow-ink/20 group-data-compact/nav:top-[calc(100%+0.5rem)] group-data-compact/nav:rounded-2xl group-data-compact/nav:border group-data-compact/nav:bg-card"
         >
           <ul className="max-w-7xl mx-auto px-4 py-3 grid gap-1">
             {links.map(({ href, label, icon: Icon }) => (
@@ -62,9 +62,9 @@ export default function MobileMenu() {
                 <Link
                   href={href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-slate-200 hover:bg-slate-800 hover:text-emerald-400 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400"
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-base font-medium text-ink hover:bg-line/50 hover:text-fern-dark transition-colors focus-visible:outline-2 focus-visible:outline-fern"
                 >
-                  <Icon className="w-5 h-5 text-emerald-500" /> {label}
+                  <Icon className="w-5 h-5 text-fern" /> {label}
                 </Link>
               </li>
             ))}

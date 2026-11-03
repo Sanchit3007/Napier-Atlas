@@ -20,11 +20,11 @@ export function HistoryRedirect() {
     if (key) router.replace(`/history/${key}`);
   }, [key, router]);
 
-  if (key !== null) return <p className="text-slate-400">Opening your history…</p>;
+  if (key !== null) return <p className="text-ink-muted">Opening your history…</p>;
   return (
-    <div className="rounded-3xl border border-dashed border-slate-800 p-10 text-center text-slate-400">
+    <div className="rounded-3xl border border-dashed border-line p-10 text-center text-ink-muted">
       No saved estimates on this browser yet. Try the{' '}
-      <Link href="/#calculator" className="text-emerald-300 hover:text-emerald-200">
+      <Link href="/#calculator" className="text-fern hover:text-fern-dark">
         Bio-CNG estimator
       </Link>{' '}
       and press “Save &amp; share this estimate”. If you saved estimates on another device, open your history link
@@ -43,7 +43,7 @@ export function RememberHistoryKey({ historyKey }: Readonly<{ historyKey: string
 export function ClearHistoryButton({ action }: Readonly<{ action: () => Promise<void> }>) {
   const [armed, setArmed] = useState(false);
   const className =
-    'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-800 hover:border-red-500/50 text-sm font-medium text-slate-300 hover:text-red-300 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-400';
+    'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line hover:border-red-500/50 text-sm font-medium text-ink hover:text-red-800 transition-colors focus-visible:outline-2 focus-visible:outline-fern';
   return (
     <form action={action}>
       {armed ? (

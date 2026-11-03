@@ -1,9 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f1f5f9;
+  --background: #b8d0a0;
+  --foreground: #18260f;
 }
+
+/* Pistachio Leaf: a soft green page with dark green text, so the eyes don't get the glare of white.
+   Text shades keep at least 7:1 contrast on both the page and the cards. */
+@theme {
+  --color-page: #b8d0a0;
+  --color-card: #cedfbc;
+  --color-line: #a3bf87;
+  --color-ink: #18260f;
+  --color-ink-muted: #29391d;
+  --color-ink-dim: #314424;
+  --color-fern: #2e4d1a; /* accent: links, buttons, highlighted figures */
+  --color-fern-dark: #1f3611;
+  --color-panel: #17240f; /* dark card behind the illustrations */}
 
 @theme inline {
   --color-background: var(--background);
@@ -14,7 +27,7 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -121,6 +134,290 @@ body {
   0%, 100% { transform: scale(0.9, 0.85); opacity: 0.85; }
   50% { transform: scale(1, 1.08); opacity: 1; }
 }
+
+/* Lifecycle plant (GrowingPlantStory). data-stage 0–3 = cutting, roots and shoots, first cut, regrowth.
+   Visitors who ask for less motion see each stage as a still picture. */
+/* The clump and the regrowth grow up from the base of the plant (120, 210 in the drawing). */
+.gp .shoots,
+.gp .regrow {
+  transform-box: view-box;
+  transform-origin: 120px 210px;
+  transform: scaleY(0);
+}
+.gp .root {
+  fill: none;
+  stroke: #f1e2c0;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+}
+.gp .bud {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.gp .cutline,
+.gp .sickle {
+  opacity: 0;
+}
+/* The tops above the cut pivot at the cut (120, 190) when they fall. */
+.gp .tops {
+  transform-box: view-box;
+  transform-origin: 120px 190px;
+}
+.gp .swing {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+.gp:not([data-stage="0"]) .root { stroke-dashoffset: 0; }
+.gp[data-stage="3"] .root { stroke-width: 1.8; }
+.gp:not([data-stage="0"]) .bud { transform: scale(0); }
+.gp[data-stage="2"] .cutting,
+.gp[data-stage="3"] .cutting { opacity: 0; }
+.gp[data-stage="1"] .shoots { transform: scaleY(0.3); }
+.gp[data-stage="2"] .shoots,
+.gp[data-stage="3"] .shoots { transform: scaleY(1); }
+/* After the cut the tops lie as a flat bundle on the ground beside the stubble; by the ratoon they are gathered. */
+.gp[data-stage="2"] .tops { transform: translateY(12px) rotate(-85deg) scale(0.4, 0.9); }
+.gp[data-stage="3"] .tops { opacity: 0; }
+.gp[data-stage="3"] .regrow { transform: scaleY(0.8); }
+.gp[data-stage="2"] .cutline { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .gp .shoots, .gp .regrow, .gp .bud { transition: transform 1.3s cubic-bezier(0.3, 1.2, 0.5, 1); }
+  .gp[data-stage="3"] .regrow { transition-delay: 0.3s; }
+  .gp .root { transition: stroke-dashoffset 1.8s ease, stroke-width 1s; }
+  .gp .cutting, .gp .cutline { transition: opacity 0.5s; }
+  /* First cut, about 4.3 s: the clump grows, the sickle comes in and swings, the tops fall and settle. */
+  .gp[data-stage="2"] .sickle { animation: gp-sickle 3.4s ease-in-out 0.9s both; }
+  .gp[data-stage="2"] .swing { animation: gp-swing 0.45s ease-in-out 1.2s 3 alternate; }
+  .gp[data-stage="2"] .tops {
+    animation:
+      gp-fall 1.1s cubic-bezier(0.55, 0, 0.9, 0.6) 2.2s both,
+      gp-settle 0.35s ease-out 3.3s forwards;
+  }
+  .gp[data-stage="2"] .cutline { animation: gp-cutline 3.4s forwards; }
+  .gp .blade {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: gp-sway 4.5s ease-in-out infinite alternate;
+  }
+}
+
+/* Each stage plays once and then holds. */
+/* The sickle comes in from the right at cut height, cuts through, then leaves to the left. */
+@keyframes gp-sickle {
+  0% { opacity: 0; transform: translate(70px, 0); }
+  12% { opacity: 1; transform: translate(40px, 0); }
+  45% { opacity: 1; transform: translate(-40px, 0); }
+  70% { opacity: 1; transform: translate(-48px, 0); }
+  100% { opacity: 0; transform: translate(-110px, -10px); }
+}
+@keyframes gp-swing {
+  from { transform: rotate(-18deg); }
+  to { transform: rotate(22deg); }
+}
+/* The cut tops tip over to the left and land flat (their spread squeezes as they lie down), with a small bounce. */
+@keyframes gp-fall {
+  from { transform: rotate(0); }
+  to { transform: translateY(12px) rotate(-86deg) scale(0.4, 0.9); }
+}
+@keyframes gp-settle {
+  0% { transform: translateY(12px) rotate(-86deg) scale(0.4, 0.9); }
+  50% { transform: translateY(10px) rotate(-82deg) scale(0.4, 0.9); }
+  100% { transform: translateY(12px) rotate(-85deg) scale(0.4, 0.9); }
+}
+/* The cut line shows where the sickle will go, then fades once the tops are down. */
+@keyframes gp-cutline {
+  0% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* Leaves move a little in the wind. */
+@keyframes gp-sway {
+  from { transform: rotate(-1.2deg); }
+  to { transform: rotate(1.4deg); }
+}
+
+/* Heading text motion (AnimatedHeading, TypedLabel). Each heading plays once when it scrolls into view, all on
+   one easing curve. The hidden starting states only apply when scripts run and the visitor allows motion, so a
+   heading is never left invisible. */
+.tm-w { display: inline-block; white-space: nowrap; }
+.tm-wi, .tm-l { display: inline-block; }
+.tm-l { --tm-final: #18260f; }
+.tm-accent .tm-l { --tm-final: #2e4d1a; }
+.tm[data-effect="underline"] { position: relative; display: inline-block; }
+.tm-blade {
+  position: absolute;
+  left: 0;
+  bottom: -0.28em;
+  width: 100%;
+  height: 0.3em;
+  overflow: visible;
+  pointer-events: none;
+}
+.tm-blade path { fill: none; stroke: #6fae47; stroke-width: 5; stroke-linecap: round; }
+.tm-leaf {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-right: 0.25em;
+  vertical-align: -0.05em;
+  transform-origin: 80% 100%;
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  /* Hero · ripening colour */
+  .tm[data-effect="ripen"] .tm-l { color: #9ccc6f; }
+  .tm[data-effect="ripen"][data-in] .tm-l {
+    animation: tm-ripen 0.7s ease forwards;
+    animation-delay: calc(var(--i) * 30ms + 150ms);
+  }
+  /* …then, for a looping heading, a soft wave of bright green runs through the letters every 9 s, forever.
+     It pauses while the heading is off screen. */
+  .tm[data-effect="ripen"][data-loop][data-in] .tm-l {
+    animation:
+      tm-ripen 0.7s ease forwards,
+      tm-wave 9s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 30ms + 150ms), calc(var(--i) * 30ms + 2500ms);
+  }
+  .tm[data-effect="ripen"][data-loop][data-in]:not([data-visible]) .tm-l { animation-play-state: paused; }
+  /* How it works · the label types out, then the heading fades up */
+  .tm-type .tm-l { opacity: 0; }
+  .tm-type[data-in] .tm-l {
+    animation: tm-show 0.12s ease-out forwards;
+    animation-delay: calc(var(--i) * 32ms);
+  }
+  .tm[data-effect="follow"] { opacity: 0; transform: translateY(8px); }
+  .tm[data-effect="follow"][data-in] { animation: tm-fade-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) var(--tm-delay) forwards; }
+  /* Lifecycle · wind gust */
+  .tm[data-effect="wind"] .tm-l { transform-origin: 50% 100%; }
+  .tm[data-effect="wind"][data-in] .tm-l {
+    animation: tm-gust 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 22ms + 150ms);
+  }
+  /* Strains · leaf marker */
+  .tm[data-effect="leaf"] .tm-leaf { transform: scale(0) rotate(-30deg); }
+  .tm[data-effect="leaf"] .tm-wi { opacity: 0; transform: translateX(-10px); }
+  .tm[data-effect="leaf"][data-in] .tm-leaf { animation: tm-leaf 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 0.05s forwards; }
+  .tm[data-effect="leaf"][data-in] .tm-wi {
+    animation: tm-fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: calc(var(--w) * 50ms + 300ms);
+  }
+  /* Estimator · words rise from behind a mask */
+  .tm[data-effect="rise"] .tm-w { overflow: hidden; vertical-align: bottom; padding-bottom: 0.06em; }
+  .tm[data-effect="rise"] .tm-wi { transform: translateY(105%); }
+  .tm[data-effect="rise"][data-in] .tm-wi {
+    animation: tm-fade-up 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation-delay: calc(var(--w) * 75ms + 100ms);
+  }
+  /* Inner pages · grass underline */
+  .tm-blade path { stroke-dasharray: 330; stroke-dashoffset: 330; }
+  .tm[data-in] .tm-blade path { animation: tm-draw 0.9s cubic-bezier(0.5, 0, 0.2, 1) 0.25s forwards; }
+}
+
+@keyframes tm-ripen { to { color: var(--tm-final); } }
+/* A short bright-green lift at the start of each 9 s cycle; still for the rest of it. */
+@keyframes tm-wave {
+  0%, 12%, 100% { color: var(--tm-final); transform: none; }
+  5% { color: #6fae47; transform: translateY(-0.05em); }
+}
+@keyframes tm-show { to { opacity: 1; } }
+@keyframes tm-fade-up { to { opacity: 1; transform: none; } }
+@keyframes tm-gust {
+  30% { transform: skewX(-13deg); }
+  60% { transform: skewX(4deg); }
+  100% { transform: skewX(0); }
+}
+@keyframes tm-leaf { to { transform: scale(1) rotate(0); } }
+@keyframes tm-draw { to { stroke-dashoffset: 0; } }
+
+/* How It Works scenes (ProcessScenes, ProcessSection). Each step's drawing and facts play when the step opens;
+   the two notes' drawings loop. The plain rules are the finished drawings, shown when visitors ask for less motion. */
+.ps-swing { transform-box: view-box; transform-origin: 0 0; }
+.ps-needle { transform-box: view-box; transform-origin: 80px 84px; transform: rotate(60deg); }
+.ps-flow { stroke-dasharray: 5 5; }
+.ps-tick { stroke-dasharray: 20; }
+@media (prefers-reduced-motion: no-preference) {
+  .ps-grow { transform-box: fill-box; transform-origin: 50% 100%; animation: ps-grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .ps-swing { animation: ps-swing 0.5s ease-in-out 3 alternate; }
+  .ps-drop { animation: ps-drop 1.4s ease-in infinite; }
+  .ps-rise { opacity: 0; animation: ps-rise 2.2s ease-out infinite; }
+  .ps-seg { transform-box: fill-box; transform-origin: 0 50%; animation: ps-seg 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .ps-needle { animation: ps-needle 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .ps-flow { animation: ps-flow 1s linear infinite; }
+  .ps-tick { stroke-dashoffset: 20; animation: ps-tick 0.4s ease forwards; }
+  .ps-in { animation: ps-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .ps-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: ps-sway 3s ease-in-out infinite alternate; }
+  .ps-bub { opacity: 0; animation: ps-bub 2.4s ease-out infinite; }
+}
+@keyframes ps-sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+@keyframes ps-bub {
+  0% { opacity: 0; transform: translateY(0); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-16px); }
+}
+@keyframes ps-grow { from { transform: scaleY(0); } }
+@keyframes ps-swing { from { transform: rotate(-16deg); } to { transform: rotate(18deg); } }
+@keyframes ps-drop {
+  from { transform: translateY(-10px); opacity: 0; }
+  30% { opacity: 1; }
+  to { transform: translateY(24px); opacity: 0; }
+}
+@keyframes ps-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-34px); opacity: 0; }
+}
+@keyframes ps-seg { from { transform: scaleX(0); } }
+@keyframes ps-needle { from { transform: rotate(-120deg); } to { transform: rotate(60deg); } }
+@keyframes ps-flow { to { stroke-dashoffset: -10; } }
+@keyframes ps-tick { to { stroke-dashoffset: 0; } }
+@keyframes ps-in { from { opacity: 0; transform: translateY(8px); } }
+
+/* Hero fact cards (HeroBento). Each card's small drawing plays once BentoCard marks it data-in. The plain rules
+   are the finished drawings, which visitors who ask for less motion see straight away. */
+.fact-span { width: 80%; } /* 40 → 200 t on a 0–200 track */
+.fact-bar { width: var(--w); }
+.fact-ring { stroke-dasharray: 63 100; }
+.fact-bub { opacity: 0; }
+.fact-runoff { stroke-dasharray: 6 6; }
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .fact-fill { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
+  [data-in] .fact-fill { animation: fact-fill 1.8s cubic-bezier(0.3, 0.8, 0.3, 1) 0.3s forwards; }
+  [data-in] .fact-bub { animation: fact-bubble 2.6s ease-out infinite; }
+  .fact-span { width: 0; }
+  [data-in] .fact-span { animation: fact-span 1.6s cubic-bezier(0.3, 0.8, 0.3, 1) 0.3s forwards; }
+  .fact-pin { opacity: 0; }
+  [data-in] .fact-pin { animation: tm-show 0.4s 1.8s forwards; }
+  .fact-bar { width: 0; }
+  [data-in] .fact-bar { animation: fact-bar 1.4s cubic-bezier(0.3, 0.8, 0.3, 1) forwards; }
+  [data-in] .fact-bar-hi { animation-delay: 0.35s; }
+  [data-in] .fact-runoff { animation: fact-flow 1.2s linear infinite; }
+  .fact-ring { stroke-dasharray: 0 100; }
+  [data-in] .fact-ring { animation: fact-ring 1.6s cubic-bezier(0.3, 0.8, 0.3, 1) 0.4s forwards; }
+}
+@keyframes fact-fill { to { transform: scaleY(1); } }
+@keyframes fact-bubble {
+  0% { opacity: 0; transform: translateY(0); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-30px); }
+}
+@keyframes fact-span { to { width: 80%; } }
+@keyframes fact-bar { to { width: var(--w); } }
+@keyframes fact-flow { to { stroke-dashoffset: -12; } }
+@keyframes fact-ring { to { stroke-dasharray: 63 100; } }
+
+/* 5-year yield chart (ProjectionChart): each time it draws, both lines (with their shading) draw from where the
+   axes meet, Year 1, across to Year 5; the yearly one a moment after the cumulative one. A new chart key restarts it. */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-grow .recharts-area {
+    clip-path: inset(-10px 100% -10px -10px);
+    animation: chart-draw 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .chart-grow .recharts-area + .recharts-area { animation-delay: 0.25s; }
+}
+@keyframes chart-draw { to { clip-path: inset(-10px -10px -10px -10px); } }
 
 /* "Save as PDF": EstimateDownloads copies the estimate report into #print-root and prints only that. */
 #print-root {

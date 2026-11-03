@@ -83,13 +83,13 @@ const FIT: Record<string, Record<string, Record<string, number>>> = {
 const fitOf = (table: Record<string, number>, slug: string) => table[slug] ?? 0.6; // unknown strains sit mid-way
 
 const COW_FODDER_TONS_PER_YEAR = 14.6; // ~40 kg green fodder per adult cow per day
-const STEMS_PER_ACRE = 11000; // two-node setts at ~2 × 2 ft spacing
+export const STEMS_PER_ACRE = 11000; // two-node setts at ~2 × 2 ft spacing
 const UNSUITED_SOIL_FACTOR = 0.8; // 20% lower yield on a soil the strain isn't suited to
 const UNSUITED_SOIL_SCORE = 0.75; // match score ×0.75 on a soil the strain isn't listed for
 const NO_SHADE_TRIAL_SCORE = 0.8; // on a shaded plot, match score ×0.8 for strains without a published shade trial
-const ORGANIC_SHARE_OF_DM = 0.862; // Feedipedia: 13.8% of Napier dry matter is ash, which makes no methane
+export const ORGANIC_SHARE_OF_DM = 0.862; // Feedipedia: 13.8% of Napier dry matter is ash, which makes no methane
 const YEAR_FACTORS = [1, 1, 1, 1, 1]; // no published decline rate, so yields are held steady after year 1
-const CBG_KG_PER_M3_METHANE = 0.72; // density of methane at standard conditions
+export const CBG_KG_PER_M3_METHANE = 0.72; // density of methane at standard conditions
 const CO2_KG_PER_KG_CBG = 2.75; // fossil CO₂ released by burning the same mass of natural gas
 
 // Compressed biogas per day, assuming year-round digester operation.
