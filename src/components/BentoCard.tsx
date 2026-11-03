@@ -32,7 +32,9 @@ export default function BentoCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
-      onViewportEnter={(entry) => entry?.target.setAttribute('data-in', '')}
+      onViewportEnter={(entry) => {
+        if (entry?.target instanceof HTMLElement) entry.target.dataset.in = '';
+      }}
       onPointerMove={track}
       className={clsx(
         'group relative isolate overflow-hidden transition-[translate,box-shadow,border-color] duration-300',
