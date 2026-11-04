@@ -54,8 +54,9 @@ export default function CropCycleTimeline({ strains }: Readonly<{ strains: Cycle
         ))}
       </fieldset>
 
-      {/* Milestones: the plant beside a text box that scrolls on its own */}
-      <GrowingPlantStory strain={strain} harvests={cuts.length} />
+      {/* Milestones: the plant beside a text box that scrolls on its own. Keyed by strain, so picking a different
+          variety starts the story again from Day 0 and plays it through (clicking the current one changes nothing). */}
+      <GrowingPlantStory key={strain.slug} strain={strain} harvests={cuts.length} />
 
       {/* Five-year harvest calendar */}
       <div className="rounded-2xl bg-card border border-line p-5 sm:p-6">
